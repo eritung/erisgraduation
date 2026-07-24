@@ -850,12 +850,12 @@ const CONFIG = {
 
   /*
     圖片建議統一放進 images 資料夾：
-    - 賓客頭像 guest-名字.webp：600 × 600 px
-    - 菜單照片 menu-01.webp ～ menu-19.webp：1600 × 1000 px（橫式）
-    - 菜色照片 dish-01.webp 起：1200 × 900 px
+    - 賓客頭像 guest-名字.png：600 × 600 px
+    - 菜單照片 menu-01.png ～ menu-19.png：1600 × 1000 px（橫式）
+    - 菜色照片 dish-01.png 起：1200 × 900 px
   */
 
-  // 賓客：avatar 放圖片路徑，例如 "images/guest-ruru.webp"；留空會顯示名字的第一個字
+  // 賓客：avatar 放圖片路徑，例如 "images/guest-ruru.png"；留空會顯示名字的第一個字
   guests: [
     { name: "Eri",      avatar: "", line: "今天你是主角。" },
     { name: "世華",     avatar: "", line: "位置幫你留好了。" },
@@ -866,16 +866,16 @@ const CONFIG = {
   ],
 
   // 完整菜單：預留 19 張橫式照片；圖片放進 images 資料夾後會自動讀取
-  // 檔名：images/menu-01.webp ～ images/menu-19.webp
+  // 檔名：images/menu-01.png ～ images/menu-19.png
   menuPages: Array.from({ length: 19 }, (_, index) => {
     const number = String(index + 1).padStart(2, "0");
     return {
-      img: "images/menu-" + number + ".webp",
+      img: "images/menu-" + number + ".png",
       alt: "萬次郎居酒屋菜單第 " + (index + 1) + " 張"
     };
   }),
 
-  // 推薦菜色：每一道各自一張圖，建議依序命名 images/dish-01.webp ～ dish-06.webp
+  // 推薦菜色：每一道各自一張圖，建議依序命名 images/dish-01.png ～ dish-06.png
   menu: [
     { name: "招牌菜一", note: "一句話說明這道為什麼要點。", img: "", pick: true  },
     { name: "招牌菜二", note: "一句話說明這道為什麼要點。", img: "", pick: false },
