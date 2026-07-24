@@ -130,7 +130,8 @@ body.has-cursor #halo{opacity:1}
 .gate-avatar{
   width:88px;height:88px;border-radius:50%;margin:0 auto 22px;
   border:1px solid rgba(95,224,206,.5);
-  background:rgba(12,47,59,.7) center/cover no-repeat;
+  position:relative;overflow:hidden;
+  background:var(--ink) center/cover no-repeat;
   display:flex;align-items:center;justify-content:center;
   font-family:var(--display);font-size:1.9rem;color:var(--nova);
   box-shadow:0 0 34px rgba(95,224,206,.18);
@@ -213,10 +214,32 @@ body.has-cursor #halo{opacity:1}
 .guest-card .ava{
   width:46px;height:46px;flex:none;border-radius:50%;
   border:1px solid rgba(95,224,206,.5);
-  background:rgba(12,47,59,.7) center/cover no-repeat;
+  position:relative;overflow:hidden;
+  background:var(--ink) center/cover no-repeat;
   display:flex;align-items:center;justify-content:center;
   font-family:var(--display);font-size:1.08rem;color:var(--nova);
   box-shadow:0 0 26px rgba(95,224,206,.16);
+}
+
+/* 大頭貼載入時只顯示星芒，不先閃出姓名首字母 */
+.gate-avatar.avatar-loading,
+.guest-card .ava.avatar-loading{color:transparent}
+
+.gate-avatar.avatar-loading::before,
+.guest-card .ava.avatar-loading::before{
+  content:"";display:block;width:22px;height:22px;
+  background:var(--aurora);
+  -webkit-clip-path:polygon(50% 0,59% 40%,100% 50%,59% 60%,50% 100%,41% 60%,0 50%,41% 40%);
+  clip-path:polygon(50% 0,59% 40%,100% 50%,59% 60%,50% 100%,41% 60%,0 50%,41% 40%);
+  filter:drop-shadow(0 0 8px rgba(95,224,206,.72));
+  animation:avatarPulse 1s ease-in-out infinite;
+}
+
+.guest-card .ava.avatar-loading::before{width:15px;height:15px}
+
+@keyframes avatarPulse{
+  0%,100%{opacity:.32;transform:scale(.65) rotate(0)}
+  50%{opacity:1;transform:scale(1) rotate(90deg)}
 }
 
 .guest-card .guest-copy{min-width:0}
@@ -491,12 +514,12 @@ body.lightbox-open{overflow:hidden}
 .dish:hover{border-color:rgba(95,224,206,.45);transform:translateY(-3px)}
 
 .dish-photo{
-  position:relative;aspect-ratio:4/3;background:var(--deep);
+  position:relative;height:220px;overflow:hidden;background:var(--deep);
   display:flex;align-items:center;justify-content:center;
 }
 
 .dish-photo .dish-img{
-  width:100%;height:100%;display:block;
+  position:absolute;inset:0;width:100%;height:100%;display:block;
   object-fit:cover;object-position:center;
 }
 
@@ -714,6 +737,7 @@ body.lightbox-open{overflow:hidden}
   .menu-lightbox-close,.menu-lightbox-arrow{width:42px;height:42px}
   .menu-lightbox-arrow.prev{left:8px}
   .menu-lightbox-arrow.next{right:8px}
+  .dish-photo{height:200px}
   .wish-form .btn{flex:1 1 100%}
   .wish-item{padding:18px 18px}
 }
@@ -1736,28 +1760,58 @@ CONFIG.guests.forEach(g => {
   sel.appendChild(o);
 });
 
-function paintAvatar(el, g) {
-  const fallback = g ? g.name.charAt(0) : "✦";
+/* 提前載入並解碼所有大頭貼，切換人物時不必重新等一次 */
+const avatarCache = new Map();
+
+function preloadAvatar(src) {
+  if (!src) return Promise.resolve(false);
+  if (avatarCache.has(src)) return avatarCache.get(src);
+
+  const pending = new Promise(resolve => {
+    const img = new Image();
+    img.decoding = "async";
+    img.addEventListener("load", async () => {
+      try {
+        if (img.decode) await img.decode();
+      } catch (_) {}
+      resolve(true);
+    }, { once: true });
+    img.addEventListener("error", () => resolve(false), { once: true });
+    img.src = src;
+  });
+
+  avatarCache.set(src, pending);
+  return pending;
+}
+
+CONFIG.guests.forEach(g => preloadAvatar(g.avatar));
+
+async function paintAvatar(el, g) {
   const src = g && g.avatar ? g.avatar : "";
 
   el.dataset.avatarSrc = src;
   el.style.backgroundImage = "none";
-  el.textContent = fallback;
+  el.textContent = "";
+  el.classList.toggle("avatar-loading", Boolean(src));
+  el.setAttribute("aria-busy", src ? "true" : "false");
 
-  if (!src) return;
+  if (!src) {
+    el.textContent = "✦";
+    return;
+  }
 
-  const probe = new Image();
-  probe.addEventListener("load", () => {
-    if (el.dataset.avatarSrc !== src) return;
+  const loaded = await preloadAvatar(src);
+  if (el.dataset.avatarSrc !== src) return;
+
+  el.classList.remove("avatar-loading");
+  el.setAttribute("aria-busy", "false");
+
+  if (loaded) {
     el.style.backgroundImage = "url('" + src + "')";
-    el.textContent = "";
-  });
-  probe.addEventListener("error", () => {
-    if (el.dataset.avatarSrc !== src) return;
+  } else {
     el.style.backgroundImage = "none";
-    el.textContent = fallback;
-  });
-  probe.src = src;
+    el.textContent = "✦";
+  }
 }
 
 sel.addEventListener("change", () => {
