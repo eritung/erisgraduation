@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Eri 的畢業典禮</title>
+<title>Eri 的畢業典禮🎓</title>
 <meta name="description" content="7/31 19:30，萬次郎居酒屋。">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -327,27 +327,97 @@ body.has-cursor #halo{opacity:1}
 .menu{padding:120px 0}
 .menu-intro{color:var(--dust);font-size:1rem;max-width:46ch;margin-bottom:40px;line-height:2}
 
-/* 第一張：完整菜單，大圖 */
-.menu-cover{
-  display:block;position:relative;margin-bottom:44px;
+/* 完整菜單：左右換頁＋淡入淡出 */
+.menu-gallery{margin-bottom:44px}
+
+.menu-stage{
+  position:relative;
   border:1px solid var(--hairline);background:var(--deep);
-  overflow:hidden;text-decoration:none;
+  overflow:hidden;isolation:isolate;
 }
 
-.menu-cover img{width:100%;height:auto;display:block}
+.menu-pages{display:grid}
 
-.menu-cover .placeholder{
-  min-height:clamp(220px,34vh,340px);
+.menu-page{
+  grid-area:1/1;position:relative;
+  display:block;min-width:0;text-decoration:none;
+  opacity:0;visibility:hidden;pointer-events:none;
+  transition:opacity .58s ease,visibility .58s ease;
+}
+
+.menu-page.is-active{opacity:1;visibility:visible;pointer-events:auto;z-index:1}
+
+.menu-page-visual{
+  height:min(72vh,780px);min-height:430px;
+  display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(145deg,rgba(12,47,59,.82),rgba(4,20,29,.92));
+}
+
+.menu-page img{
+  width:100%;height:100%;display:block;object-fit:contain;
+}
+
+.menu-page .placeholder{
+  width:100%;height:100%;
   display:flex;align-items:center;justify-content:center;
   font-family:var(--mono);font-size:.7rem;letter-spacing:.2em;
   color:rgba(132,169,175,.6);text-align:center;padding:26px;line-height:2.2;
 }
 
-.menu-cover .cap{
+.menu-page .cap{
   position:absolute;left:0;bottom:0;right:0;
   padding:26px 24px 18px;
   background:linear-gradient(transparent, rgba(4,20,29,.9));
   font-family:var(--mono);font-size:.7rem;letter-spacing:.2em;color:var(--aurora);
+}
+
+.menu-arrow{
+  position:absolute;z-index:3;top:50%;transform:translateY(-50%);
+  width:48px;height:48px;border-radius:50%;
+  border:1px solid rgba(230,244,242,.24);
+  background:rgba(4,20,29,.72);color:var(--starlight);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:border-color .3s ease,color .3s ease,background .3s ease;
+}
+
+.menu-arrow:hover{border-color:var(--aurora);background:rgba(8,38,48,.94);color:var(--aurora)}
+.menu-arrow.prev{left:18px}
+.menu-arrow.next{right:18px}
+.menu-arrow svg{width:18px;height:18px}
+.menu-arrow[hidden]{display:none}
+
+.menu-progress{
+  display:flex;align-items:center;justify-content:center;gap:13px;
+  min-height:28px;margin-top:18px;
+}
+
+.menu-progress[hidden]{display:none}
+
+.menu-progress button{
+  width:24px;height:24px;border:0;background:transparent;padding:0;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;
+}
+
+/* 四角菱形星星：進度會依 CONFIG.menuPages 頁數自動產生 */
+.menu-progress button::before{
+  content:"";display:block;width:13px;height:13px;
+  background:rgba(132,169,175,.48);
+  clip-path:polygon(50% 0,59% 40%,100% 50%,59% 60%,50% 100%,41% 60%,0 50%,41% 40%);
+  transform:scale(.72);
+  transition:background .3s ease,transform .3s ease,filter .3s ease;
+}
+
+.menu-progress button:hover::before{background:var(--aurora);transform:scale(.9)}
+.menu-progress button.is-active::before{
+  background:var(--nova);transform:scale(1);
+  filter:drop-shadow(0 0 6px rgba(242,193,78,.8));
+}
+
+.sr-only{
+  position:absolute;width:1px;height:1px;padding:0;margin:-1px;
+  overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;
 }
 
 .dishes{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:26px}
@@ -451,6 +521,11 @@ body.has-cursor #halo{opacity:1}
   .nav{gap:12px;padding:0 16px}
   .nav-mark{font-size:.82rem;letter-spacing:.1em}
   .nav-links a{padding:8px 10px;font-size:.68rem;letter-spacing:.12em}
+  .menu-page-visual{height:min(66vh,620px);min-height:360px}
+  .menu-arrow{width:42px;height:42px}
+  .menu-arrow.prev{left:10px}
+  .menu-arrow.next{right:10px}
+  .menu-page .cap{padding:28px 18px 15px;font-size:.64rem}
 }
 
 @media (hover:none){#halo{display:none}}
@@ -641,7 +716,18 @@ body.has-cursor #halo{opacity:1}
         看到想吃的就按「想吃」，大家都看得到誰想點什麼。
       </p>
 
-      <a class="menu-cover reveal" data-delay="120" id="menuCover" href="#" target="_blank" rel="noopener" aria-label="查看完整菜單"></a>
+      <div class="menu-gallery reveal" data-delay="120" id="menuGallery">
+        <div class="menu-stage" id="menuStage" tabindex="0" aria-label="完整菜單輪播">
+          <div class="menu-pages" id="menuPages" aria-live="polite"></div>
+          <button class="menu-arrow prev" id="menuPrev" type="button" aria-label="上一頁菜單">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg>
+          </button>
+          <button class="menu-arrow next" id="menuNext" type="button" aria-label="下一頁菜單">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg>
+          </button>
+        </div>
+        <div class="menu-progress" id="menuProgress" role="tablist" aria-label="菜單頁面"></div>
+      </div>
 
       <div class="dishes" id="dishes"></div>
 
@@ -679,7 +765,14 @@ const CONFIG = {
   eventTitle: "Eri 的畢業典禮",
   eventDesc:  "萬次郎居酒屋（八條通）。19:30 開始。",
 
-  // 賓客：avatar 放圖片路徑，例如 "images/ruru.jpg"；留空會顯示名字的第一個字
+  /*
+    圖片建議統一放進 images 資料夾：
+    - 賓客頭像 guest-名字.webp：600 × 600 px
+    - 菜單頁面 menu-01.webp 起：1600 × 2200 px
+    - 菜色照片 dish-01.webp 起：1200 × 900 px
+  */
+
+  // 賓客：avatar 放圖片路徑，例如 "images/guest-ruru.webp"；留空會顯示名字的第一個字
   guests: [
     { name: "Eri",      avatar: "", line: "今天你是主角。" },
     { name: "世華",     avatar: "", line: "位置幫你留好了。" },
@@ -689,13 +782,16 @@ const CONFIG = {
     { name: "Jennifer", avatar: "", line: "位置幫你留好了。" }
   ],
 
-  // 第一張大圖：完整菜單
-  menuCover: {
-    img: "",                      // 例如 "images/menu-full.jpg"
-    caption: "完整菜單 · 點圖可放大"
-  },
+  // 完整菜單：有幾頁就保留幾筆，進度星星會自動跟著頁數變化
+  // 建議檔名：images/menu-01.webp、menu-02.webp、menu-03.webp、menu-04.webp
+  menuPages: [
+    { img: "", caption: "菜單 01 · 點圖可放大", alt: "萬次郎居酒屋菜單第 1 頁" },
+    { img: "", caption: "菜單 02 · 點圖可放大", alt: "萬次郎居酒屋菜單第 2 頁" },
+    { img: "", caption: "菜單 03 · 點圖可放大", alt: "萬次郎居酒屋菜單第 3 頁" },
+    { img: "", caption: "菜單 04 · 點圖可放大", alt: "萬次郎居酒屋菜單第 4 頁" }
+  ],
 
-  // 推薦菜色：每一道各自一張圖
+  // 推薦菜色：每一道各自一張圖，建議依序命名 images/dish-01.webp ～ dish-06.webp
   menu: [
     { name: "招牌菜一", note: "一句話說明這道為什麼要點。", img: "", pick: true  },
     { name: "招牌菜二", note: "一句話說明這道為什麼要點。", img: "", pick: false },
@@ -853,17 +949,133 @@ function tick() {
 tick();
 setInterval(tick, 1000);
 
-/* ---- 菜單封面 ---- */
-const cover = $("menuCover");
-if (CONFIG.menuCover.img) {
-  cover.href = CONFIG.menuCover.img;
-  cover.innerHTML = '<img src="' + CONFIG.menuCover.img + '" alt="完整菜單">' +
-                    '<span class="cap">' + CONFIG.menuCover.caption + '</span>';
-} else {
-  cover.removeAttribute("href");
-  cover.removeAttribute("target");
-  cover.innerHTML = '<div class="placeholder">完整菜單放這裡（大圖）<br>CONFIG.menuCover.img</div>';
+/* ---- 完整菜單輪播 ---- */
+const menuPageData = Array.isArray(CONFIG.menuPages) && CONFIG.menuPages.length
+  ? CONFIG.menuPages
+  : [{ img: "", caption: "完整菜單", alt: "完整菜單" }];
+
+const menuPagesEl = $("menuPages");
+const menuProgressEl = $("menuProgress");
+const menuPrev = $("menuPrev");
+const menuNext = $("menuNext");
+const menuStage = $("menuStage");
+let activeMenuPage = 0;
+let menuWasSwiped = false;
+
+menuPageData.forEach((pageData, index) => {
+  const page = document.createElement(pageData.img ? "a" : "div");
+  page.className = "menu-page";
+  page.dataset.page = index;
+  page.setAttribute("role", "tabpanel");
+  page.setAttribute("aria-label", "菜單第 " + (index + 1) + " 頁");
+
+  if (pageData.img) {
+    page.href = pageData.img;
+    page.target = "_blank";
+    page.rel = "noopener";
+  }
+
+  const visual = document.createElement("div");
+  visual.className = "menu-page-visual";
+
+  if (pageData.img) {
+    const img = document.createElement("img");
+    img.src = pageData.img;
+    img.alt = pageData.alt || ("菜單第 " + (index + 1) + " 頁");
+    img.addEventListener("error", () => {
+      const placeholder = document.createElement("div");
+      placeholder.className = "placeholder";
+      placeholder.innerHTML = "找不到菜單第 " + (index + 1) + " 頁圖片<br>請檢查 CONFIG.menuPages[" + index + "].img";
+      visual.replaceChildren(placeholder);
+      page.removeAttribute("href");
+      page.removeAttribute("target");
+    });
+    visual.appendChild(img);
+  } else {
+    const placeholder = document.createElement("div");
+    placeholder.className = "placeholder";
+    placeholder.innerHTML = "菜單第 " + (index + 1) + " 頁放這裡<br>CONFIG.menuPages[" + index + "].img";
+    visual.appendChild(placeholder);
+  }
+
+  const caption = document.createElement("span");
+  caption.className = "cap";
+  caption.textContent = pageData.caption || ("菜單 " + String(index + 1).padStart(2, "0"));
+
+  page.append(visual, caption);
+  menuPagesEl.appendChild(page);
+
+  const progress = document.createElement("button");
+  progress.type = "button";
+  progress.dataset.page = index;
+  progress.setAttribute("role", "tab");
+  progress.setAttribute("aria-label", "切換到菜單第 " + (index + 1) + " 頁");
+  progress.innerHTML = '<span class="sr-only">第 ' + (index + 1) + ' 頁</span>';
+  progress.addEventListener("click", () => showMenuPage(index));
+  menuProgressEl.appendChild(progress);
+});
+
+function showMenuPage(index) {
+  const count = menuPageData.length;
+  activeMenuPage = (index + count) % count;
+
+  menuPagesEl.querySelectorAll(".menu-page").forEach((page, pageIndex) => {
+    const isActive = pageIndex === activeMenuPage;
+    page.classList.toggle("is-active", isActive);
+    page.setAttribute("aria-hidden", String(!isActive));
+    page.tabIndex = isActive && page.tagName === "A" ? 0 : -1;
+  });
+
+  menuProgressEl.querySelectorAll("button").forEach((dot, pageIndex) => {
+    const isActive = pageIndex === activeMenuPage;
+    dot.classList.toggle("is-active", isActive);
+    dot.setAttribute("aria-selected", String(isActive));
+    dot.tabIndex = isActive ? 0 : -1;
+  });
 }
+
+const hasMultipleMenuPages = menuPageData.length > 1;
+menuPrev.hidden = !hasMultipleMenuPages;
+menuNext.hidden = !hasMultipleMenuPages;
+menuProgressEl.hidden = !hasMultipleMenuPages;
+
+menuPrev.addEventListener("click", () => showMenuPage(activeMenuPage - 1));
+menuNext.addEventListener("click", () => showMenuPage(activeMenuPage + 1));
+
+menuStage.addEventListener("keydown", e => {
+  if (e.key === "ArrowLeft") {
+    e.preventDefault();
+    showMenuPage(activeMenuPage - 1);
+  } else if (e.key === "ArrowRight") {
+    e.preventDefault();
+    showMenuPage(activeMenuPage + 1);
+  }
+});
+
+let menuTouchX = 0;
+let menuTouchY = 0;
+
+menuStage.addEventListener("touchstart", e => {
+  menuTouchX = e.changedTouches[0].clientX;
+  menuTouchY = e.changedTouches[0].clientY;
+  menuWasSwiped = false;
+}, { passive: true });
+
+menuStage.addEventListener("touchend", e => {
+  const dx = e.changedTouches[0].clientX - menuTouchX;
+  const dy = e.changedTouches[0].clientY - menuTouchY;
+  if (Math.abs(dx) < 48 || Math.abs(dx) <= Math.abs(dy)) return;
+  menuWasSwiped = true;
+  showMenuPage(activeMenuPage + (dx < 0 ? 1 : -1));
+}, { passive: true });
+
+menuPagesEl.addEventListener("click", e => {
+  if (!menuWasSwiped) return;
+  e.preventDefault();
+  menuWasSwiped = false;
+});
+
+showMenuPage(0);
 
 /* ---- 想吃：資料層 ---- */
 const SB = CONFIG.supabase;
