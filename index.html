@@ -492,8 +492,12 @@ body.lightbox-open{overflow:hidden}
 
 .dish-photo{
   position:relative;aspect-ratio:4/3;background:var(--deep);
-  background-size:cover;background-position:center;
   display:flex;align-items:center;justify-content:center;
+}
+
+.dish-photo .dish-img{
+  width:100%;height:100%;display:block;
+  object-fit:cover;object-position:center;
 }
 
 .dish-photo .empty{font-family:var(--mono);font-size:.66rem;letter-spacing:.2em;color:rgba(132,169,175,.6);text-align:center;padding:0 16px;line-height:2}
@@ -514,7 +518,7 @@ body.lightbox-open{overflow:hidden}
 
 .want{
   display:inline-flex;align-items:center;gap:9px;
-  padding:10px 16px;cursor:pointer;
+  padding:10px 16px;cursor:pointer;white-space:nowrap;
   font-family:var(--mono);font-size:.72rem;letter-spacing:.14em;
   border:1px solid var(--hairline);background:transparent;color:var(--dust);
   transition:all .3s ease;
@@ -564,36 +568,74 @@ body.lightbox-open{overflow:hidden}
 
 .wish-msg.show{opacity:1}
 
-.wish-list{list-style:none;margin-top:26px;display:grid;gap:12px}
+/* 公告欄：一張張釘上去的小卡 */
+.wish-list{
+  list-style:none;margin-top:30px;
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(212px,1fr));
+  gap:20px;
+}
 
 .wish-item{
-  display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap;
-  padding:20px 22px;
+  position:relative;
+  display:flex;flex-direction:column;
+  padding:34px 20px 20px;
   border:1px solid var(--hairline);
-  background:rgba(8,38,48,.3);
+  background:rgba(8,38,48,.34);
   backdrop-filter:blur(18px) saturate(1.25);-webkit-backdrop-filter:blur(18px) saturate(1.25);
-  transition:border-color .35s ease;
+  box-shadow:0 16px 40px rgba(0,0,0,.22);
+  transition:border-color .35s ease,transform .35s ease,box-shadow .35s ease;
 }
 
-.wish-item:hover{border-color:rgba(95,224,206,.4)}
+/* 上方的圖釘 */
+.wish-item::before{
+  content:"✦";
+  position:absolute;top:10px;left:50%;transform:translateX(-50%);
+  font-size:.9rem;line-height:1;color:var(--nova);
+  text-shadow:0 0 12px rgba(242,193,78,.75);
+}
 
-.wish-item-main{flex:1 1 200px;min-width:0}
-.wish-name{font-family:var(--display);font-weight:300;font-size:1.2rem;letter-spacing:.05em;line-height:1.5;display:block;word-break:break-word}
-.wish-by{font-family:var(--mono);font-size:.66rem;letter-spacing:.16em;color:var(--dust)}
+.wish-item:nth-child(3n+1){transform:rotate(-.7deg)}
+.wish-item:nth-child(3n+3){transform:rotate(.7deg)}
 
-.wish-item .want-row{margin-top:0;padding-top:0;display:flex;align-items:center;gap:10px}
-.wish-item .wanters{flex:1 1 100%;margin-top:4px}
+.wish-item:hover{
+  transform:rotate(0deg) translateY(-4px);
+  border-color:rgba(95,224,206,.45);
+  box-shadow:0 22px 52px rgba(0,0,0,.3);
+}
+
+.wish-item-main{margin-bottom:18px}
+
+.wish-name{
+  display:block;
+  font-family:var(--display);font-weight:300;
+  font-size:1.24rem;letter-spacing:.05em;line-height:1.55;
+  word-break:break-word;
+}
+
+.wish-by{
+  display:block;margin-top:6px;
+  font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;color:var(--dust);
+}
+
+.wish-item .want-row{
+  margin-top:auto;padding-top:0;
+  display:flex;flex-direction:column;align-items:flex-start;gap:2px;
+}
+
+.wish-item .wanters{margin-top:10px;font-size:.8rem}
 
 .wish-del{
-  width:34px;height:34px;flex:none;
-  border:1px solid var(--hairline);background:transparent;
-  color:var(--dust);font-size:1.1rem;line-height:1;cursor:pointer;
-  transition:border-color .3s ease,color .3s ease;
+  position:absolute;top:8px;right:8px;
+  width:26px;height:26px;
+  display:flex;align-items:center;justify-content:center;
+  border:0;background:transparent;
+  color:rgba(132,169,175,.7);font-size:1rem;line-height:1;cursor:pointer;
+  transition:color .3s ease;
 }
 
-.wish-del:hover{border-color:rgba(242,193,78,.6);color:var(--nova)}
+.wish-del:hover{color:var(--nova)}
 
-.wish-empty{font-size:.88rem;color:var(--dust);margin-top:22px}
+.wish-empty{font-size:.88rem;color:var(--dust);margin-top:26px}
 
 .db-hint{
   margin-top:36px;font-family:var(--mono);font-size:.7rem;letter-spacing:.1em;
@@ -709,7 +751,7 @@ body.lightbox-open{overflow:hidden}
     <div class="gate-avatar" id="gateAva">✦</div>
     <p class="eyebrow">觀測站 · 身分確認</p>
     <h2>進來之前<br>先報上名字</h2>
-    <p class="gate-sub">確認完才會放行，這是規矩。</p>
+    <p class="gate-sub">.:*(｡+♡＾ω＾♡+｡)*</p>
 
     <div class="select-wrap">
       <select id="who" aria-label="選擇你的名字">
@@ -719,7 +761,7 @@ body.lightbox-open{overflow:hidden}
 
     <button id="enter" type="button" disabled>進 入</button>
 
-    <p class="gate-note">名單上沒有你的話，那是我漏掉了，快跟我說。</p>
+    <p class="gate-note">   ╲⠀｡╲     ☾⋆.˚ ⠀ ╲ ⋆｡   ╲⠀｡╲  </p>
   </div>
 </div>
 
@@ -861,7 +903,7 @@ body.lightbox-open{overflow:hidden}
 
       <p class="menu-intro reveal from-left" data-delay="60">
         圖片僅供參考，Eri 的推薦也僅供參考。<br>
-        看到想吃的就按「想吃」，大家都看得到誰想點什麼。
+        看到想吃的就按「想吃」，也可以在下面自己許願🌟
       </p>
 
       <div class="menu-gallery reveal" data-delay="120" id="menuGallery">
@@ -890,7 +932,7 @@ body.lightbox-open{overflow:hidden}
         <div class="wish-head">
           <span class="eyebrow">Wish List</span>
           <h3>還想點什麼？</h3>
-          <p>上面沒有的自己加，加完大家都看得到，也可以互相按想吃。</p>
+          <p>上面沒有的自己加，加完大家都看得到！</p>
         </div>
 
         <div class="wish-form">
@@ -956,19 +998,19 @@ const CONFIG = {
 
   /*
     圖片建議統一放進 images 資料夾：
-    - 賓客頭像 guest-名字.png：600 × 600 px
+    - 賓客頭像 guest-名字.webp：600 × 600 px
     - 菜單照片 menu-01.png ～ menu-19.png：1600 × 1000 px（橫式）
     - 菜色照片 dish-01.png 起：1200 × 900 px
   */
 
-  // 賓客：avatar 放圖片路徑，例如 "images/guest-ruru.png"；留空會顯示名字的第一個字
+  // 賓客：大頭貼統一使用 WebP，檔名大小寫需與 images 資料夾完全相同
   guests: [
-    { name: "Eri",      avatar: "", line: "今天你是主角。" },
-    { name: "世華",     avatar: "", line: "位置幫你留好了。" },
-    { name: "Ruru",     avatar: "", line: "位置幫你留好了。" },
-    { name: "Ally",     avatar: "", line: "位置幫你留好了。" },
-    { name: "Irene",    avatar: "", line: "位置幫你留好了。" },
-    { name: "Jennifer", avatar: "", line: "位置幫你留好了。" }
+    { name: "Eri",      avatar: "images/guest-eri.webp",      line: "今天你是主角。" },
+    { name: "世華",     avatar: "images/guest-shihua.webp",   line: "位置幫你留好了。" },
+    { name: "Ruru",     avatar: "images/guest-ruru.webp",     line: "位置幫你留好了。" },
+    { name: "Ally",     avatar: "images/guest-ally.webp",     line: "位置幫你留好了。" },
+    { name: "Irene",    avatar: "images/guest-irene.webp",    line: "位置幫你留好了。" },
+    { name: "Jennifer", avatar: "images/guest-jennifer.webp", line: "位置幫你留好了。" }
   ],
 
   // 完整菜單：預留 19 張橫式照片；圖片放進 images 資料夾後會自動讀取
@@ -983,12 +1025,12 @@ const CONFIG = {
 
   // 推薦菜色：每一道各自一張圖，建議依序命名 images/dish-01.png ～ dish-06.png
   menu: [
-    { name: "芥末章魚", note: "伊淇激推🌟不吃辣的人也會敢吃❗️覺得非常開胃，半夜常常在家想到它🐙⋯", img: "", pick: true  },
-    { name: "明太子雞肉", note: "初來乍到安全牌🏅", img: "", pick: false },
-    { name: "炸牡蠣/其他炸物", note: "某網友說他超愛，提供給愛牡蠣的人🦪其他炸物聽說也不錯🌠", img: "", pick: false  },
-    { name: "生蛋蓋飯/茶泡飯系列", note: "覺得敢吃生蛋的人必點！茶泡飯我個人也很喜歡😮‍💨", img: "", pick: true },
-    { name: "麻辣擔擔豆腐", note: "其實我沒吃過！但看起來很好吃（？）可以當候補", img: "", pick: false },
-    { name: "日式炒麵",     note: "一秒到日本，不知要點啥主餐可Pick它🍜",     img: "", pick: true  }
+    { name: "芥末章魚", note: "伊淇激推🌟不吃辣的人也會敢吃❗️覺得非常開胃，半夜常常在家想到它🐙⋯", img: "images/dish-01.png", pick: true  },
+    { name: "明太子雞肉", note: "初來乍到安全牌🏅", img: "images/dish-02.png", pick: false },
+    { name: "炸牡蠣/其他炸物", note: "某網友說他超愛，提供給愛牡蠣的人🦪其他炸物聽說也不錯🌠", img: "images/dish-03.png", pick: false  },
+    { name: "生蛋蓋飯/茶泡飯系列", note: "覺得敢吃生蛋的人必點！茶泡飯我個人也很喜歡😮‍💨", img: "images/dish-04.png", pick: true },
+    { name: "麻辣擔擔豆腐", note: "其實我沒吃過！但看起來很好吃（？）可以當候補", img: "images/dish-05.png", pick: false },
+    { name: "日式炒麵",     note: "一秒到日本，不知要點啥主餐可Pick它🍜",     img: "images/dish-06.png", pick: true  }
   ],
 
   // 「想吃」與「大家加點的菜」要跨裝置共用，就填 Supabase 的 Project URL 與 Publishable key
@@ -1453,8 +1495,9 @@ const Wishes = {
 /* ---- 推薦菜色卡片 ---- */
 $("dishes").innerHTML = CONFIG.menu.map((d, i) => `
   <article class="dish reveal" data-delay="${i * 110}">
-    <div class="dish-photo"${d.img ? ` style="background-image:url('${d.img}')"` : ""}>
-      ${d.img ? "" : '<span class="empty">照片放這裡<br>CONFIG.menu → img</span>'}
+    <div class="dish-photo">
+      ${d.img ? `<img class="dish-img" src="${d.img}" alt="${d.name}" loading="lazy" decoding="async">` : ""}
+      <span class="empty"${d.img ? " hidden" : ""}>找不到菜色照片<br>${d.img || "CONFIG.menu → img"}</span>
       ${d.pick ? '<span class="pick">✦ ERI 推薦必點</span>' : ""}
     </div>
     <div class="dish-body">
@@ -1469,6 +1512,14 @@ $("dishes").innerHTML = CONFIG.menu.map((d, i) => `
     </div>
   </article>
 `).join("");
+
+document.querySelectorAll(".dish-img").forEach(img => {
+  img.addEventListener("error", () => {
+    img.hidden = true;
+    const placeholder = img.parentElement.querySelector(".empty");
+    if (placeholder) placeholder.hidden = false;
+  });
+});
 
 let wantData = [];
 let wishData = [];
@@ -1536,7 +1587,7 @@ function renderWishes() {
 
     const by = document.createElement("span");
     by.className = "wish-by";
-    by.textContent = (w.guest === me ? "你" : w.guest) + " 加點的";
+    by.textContent = "由" + (w.guest === me ? "你" : w.guest) + "加點";
 
     main.append(name, by);
 
@@ -1549,7 +1600,11 @@ function renderWishes() {
     btn.dataset.dish = w.dish;
     btn.innerHTML = '<span class="star">✦</span><span class="txt">想吃</span><span class="count"></span>';
 
-    row.appendChild(btn);
+    const wanters = document.createElement("div");
+    wanters.className = "wanters";
+
+    row.append(btn, wanters);
+    li.append(main, row);
 
     if (w.guest === me) {
       const del = document.createElement("button");
@@ -1559,14 +1614,9 @@ function renderWishes() {
       del.setAttribute("aria-label", "移除「" + w.dish + "」");
       del.textContent = "×";
       del.addEventListener("click", () => removeWish(w.dish, del));
-      row.appendChild(del);
+      li.appendChild(del);
     }
 
-    const wanters = document.createElement("div");
-    wanters.className = "wanters";
-    row.appendChild(wanters);
-
-    li.append(main, row);
     wishList.appendChild(li);
   });
 
@@ -1618,8 +1668,23 @@ async function removeWish(dish, btn) {
 }
 
 wishAdd.addEventListener("click", addWish);
+
+/* 中文輸入法選字時按 Enter 只是確認候選字，不能當成送出 */
+let composing = false;
+let justComposed = false;
+
+wishInput.addEventListener("compositionstart", () => { composing = true; });
+wishInput.addEventListener("compositionend", () => {
+  composing = false;
+  justComposed = true;
+  setTimeout(() => { justComposed = false; }, 120);
+});
+
 wishInput.addEventListener("keydown", e => {
-  if (e.key === "Enter") { e.preventDefault(); addWish(); }
+  if (e.key !== "Enter") return;
+  e.preventDefault();
+  if (composing || justComposed || e.isComposing || e.keyCode === 229) return;
+  addWish();
 });
 
 /* ---- 想吃：點擊（用委派，動態加入的卡片也吃得到） ---- */
@@ -1672,13 +1737,27 @@ CONFIG.guests.forEach(g => {
 });
 
 function paintAvatar(el, g) {
-  if (g && g.avatar) {
-    el.style.backgroundImage = "url('" + g.avatar + "')";
+  const fallback = g ? g.name.charAt(0) : "✦";
+  const src = g && g.avatar ? g.avatar : "";
+
+  el.dataset.avatarSrc = src;
+  el.style.backgroundImage = "none";
+  el.textContent = fallback;
+
+  if (!src) return;
+
+  const probe = new Image();
+  probe.addEventListener("load", () => {
+    if (el.dataset.avatarSrc !== src) return;
+    el.style.backgroundImage = "url('" + src + "')";
     el.textContent = "";
-  } else {
+  });
+  probe.addEventListener("error", () => {
+    if (el.dataset.avatarSrc !== src) return;
     el.style.backgroundImage = "none";
-    el.textContent = g ? g.name.charAt(0) : "✦";
-  }
+    el.textContent = fallback;
+  });
+  probe.src = src;
 }
 
 sel.addEventListener("change", () => {
