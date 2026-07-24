@@ -533,6 +533,68 @@ body.lightbox-open{overflow:hidden}
 
 .wanters.show{opacity:1}
 
+/* ---------- 大家想加點的 ---------- */
+.wish{margin-top:56px}
+
+.wish-head{margin-bottom:24px}
+.wish-head h3{font-family:var(--display);font-weight:300;font-size:1.5rem;letter-spacing:.1em;margin-top:8px}
+.wish-head p{font-size:.92rem;color:var(--dust);margin-top:6px;line-height:1.9}
+
+.wish-form{display:flex;gap:12px;flex-wrap:wrap;align-items:stretch}
+
+.wish-form input{
+  flex:1 1 260px;min-width:0;
+  padding:16px 20px;
+  font-family:var(--body);font-size:1rem;font-weight:300;letter-spacing:.03em;
+  color:var(--starlight);
+  border:1px solid var(--hairline);
+  background:rgba(8,38,48,.32);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  transition:border-color .3s ease;
+}
+
+.wish-form input::placeholder{color:rgba(132,169,175,.7)}
+.wish-form input:focus{border-color:var(--aurora);outline:none}
+.wish-form .btn{flex:0 0 auto}
+
+.wish-msg{
+  font-size:.84rem;color:var(--nova);margin-top:12px;min-height:1.4em;
+  opacity:0;transition:opacity .3s ease;
+}
+
+.wish-msg.show{opacity:1}
+
+.wish-list{list-style:none;margin-top:26px;display:grid;gap:12px}
+
+.wish-item{
+  display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap;
+  padding:20px 22px;
+  border:1px solid var(--hairline);
+  background:rgba(8,38,48,.3);
+  backdrop-filter:blur(18px) saturate(1.25);-webkit-backdrop-filter:blur(18px) saturate(1.25);
+  transition:border-color .35s ease;
+}
+
+.wish-item:hover{border-color:rgba(95,224,206,.4)}
+
+.wish-item-main{flex:1 1 200px;min-width:0}
+.wish-name{font-family:var(--display);font-weight:300;font-size:1.2rem;letter-spacing:.05em;line-height:1.5;display:block;word-break:break-word}
+.wish-by{font-family:var(--mono);font-size:.66rem;letter-spacing:.16em;color:var(--dust)}
+
+.wish-item .want-row{margin-top:0;padding-top:0;display:flex;align-items:center;gap:10px}
+.wish-item .wanters{flex:1 1 100%;margin-top:4px}
+
+.wish-del{
+  width:34px;height:34px;flex:none;
+  border:1px solid var(--hairline);background:transparent;
+  color:var(--dust);font-size:1.1rem;line-height:1;cursor:pointer;
+  transition:border-color .3s ease,color .3s ease;
+}
+
+.wish-del:hover{border-color:rgba(242,193,78,.6);color:var(--nova)}
+
+.wish-empty{font-size:.88rem;color:var(--dust);margin-top:22px}
+
 .db-hint{
   margin-top:36px;font-family:var(--mono);font-size:.7rem;letter-spacing:.1em;
   color:var(--dust);border-left:1px solid rgba(242,193,78,.5);padding-left:16px;line-height:2;
@@ -610,6 +672,8 @@ body.lightbox-open{overflow:hidden}
   .menu-lightbox-close,.menu-lightbox-arrow{width:42px;height:42px}
   .menu-lightbox-arrow.prev{left:8px}
   .menu-lightbox-arrow.next{right:8px}
+  .wish-form .btn{flex:1 1 100%}
+  .wish-item{padding:18px 18px}
 }
 
 @media (hover:none){#halo{display:none}}
@@ -821,6 +885,27 @@ body.lightbox-open{overflow:hidden}
 
       <div class="dishes" id="dishes"></div>
 
+      <!-- 大家自己加點的 -->
+      <div class="wish reveal" data-delay="80" id="wish">
+        <div class="wish-head">
+          <span class="eyebrow">Wish List</span>
+          <h3>還想點什麼？</h3>
+          <p>上面沒有的自己加，加完大家都看得到，也可以互相按想吃。</p>
+        </div>
+
+        <div class="wish-form">
+          <input id="wishInput" type="text" maxlength="30" placeholder="例如：烤雞肉串、玉子燒⋯" autocomplete="off" aria-label="輸入你想點的菜">
+          <button class="btn btn-gold" id="wishAdd" type="button">
+            <span>加進菜單</span>
+          </button>
+        </div>
+
+        <p class="wish-msg" id="wishMsg" role="status"></p>
+
+        <ul class="wish-list" id="wishList"></ul>
+        <p class="wish-empty" id="wishEmpty">還沒有人加點，你可以當第一個。</p>
+      </div>
+
       <p class="db-hint reveal" id="dbHint"></p>
     </div>
   </section>
@@ -906,11 +991,12 @@ const CONFIG = {
     { name: "日式炒麵",     note: "一秒到日本，不知要點啥主餐可Pick它🍜",     img: "", pick: true  }
   ],
 
-  // 「想吃」要跨裝置共用，就填 Supabase 的 Project URL 與 Publishable key
+  // 「想吃」與「大家加點的菜」要跨裝置共用，就填 Supabase 的 Project URL 與 Publishable key
   supabase: {
     url: "https://ysxmfcoiqgzqjzhdrnco.supabase.co",   // Connect 視窗中的 Project URL
     key: "sb_publishable_bUSkJbDDjjlXZlM0K4NbgA__N4Vbnmr",   // Publishable key
-    table: "wants"
+    table: "wants",           // 想吃的紀錄
+    wishTable: "wishes"       // 大家自己加點的菜
   }
 };
 
@@ -921,6 +1007,7 @@ const CONFIG = {
    3. 將兩者貼回 CONFIG.supabase.url / key。
    4. 不可使用 Secret key 或 service_role key，它們不能放在公開網頁。
 
+   -- 想吃（原本就有的，若已建立可略過）
    create table if not exists public.wants (
      id bigint generated always as identity primary key,
      dish text not null,
@@ -950,7 +1037,33 @@ const CONFIG = {
    create policy "guest can remove want"
      on public.wants for delete to anon using (true);
 
-   沒填的話「想吃」只會存在這次瀏覽的記憶體裡，重整就沒了。
+   -- 大家自己加點的菜（這次新增的，請執行這一段）
+   create table if not exists public.wishes (
+     id bigint generated always as identity primary key,
+     dish text not null,
+     guest text not null,
+     created_at timestamptz default now(),
+     constraint wishes_dish_unique unique (dish)
+   );
+
+   alter table public.wishes enable row level security;
+
+   grant select, insert, delete on table public.wishes to anon;
+   grant usage on sequence public.wishes_id_seq to anon;
+
+   drop policy if exists "guest can read wishes" on public.wishes;
+   drop policy if exists "guest can add wish" on public.wishes;
+   drop policy if exists "guest can remove wish" on public.wishes;
+
+   create policy "guest can read wishes"
+     on public.wishes for select to anon using (true);
+   create policy "guest can add wish"
+     on public.wishes for insert to anon
+     with check (char_length(dish) between 1 and 30 and char_length(guest) between 1 and 40);
+   create policy "guest can remove wish"
+     on public.wishes for delete to anon using (true);
+
+   沒填的話「想吃」和「加點」只會存在這次瀏覽的記憶體裡，重整就沒了。
    這是免登入的活動頁做法，因此拿到網址的人仍可模擬賓客操作；
    若未來要做正式會員按讚，需再加入 Supabase Auth。
    --------------------------------------------------------- */
@@ -1264,13 +1377,15 @@ document.addEventListener("keydown", e => {
 /* 避免手機雙擊頁面時觸發瀏覽器放大 */
 document.addEventListener("dblclick", e => e.preventDefault(), { passive: false });
 
-/* ---- 想吃：資料層 ---- */
+/* ---- 資料層：想吃 + 大家加點的菜 ---- */
 const SB = CONFIG.supabase;
 const SB_URL = String(SB.url || "").trim().replace(/\/+$/, "");
 const SB_KEY = String(SB.key || "").trim();
 const SB_TABLE = encodeURIComponent(String(SB.table || "wants").trim());
+const SB_WISH_TABLE = encodeURIComponent(String(SB.wishTable || "wishes").trim());
 const useDB = !!(SB_URL && SB_KEY);
-let localWants = [];   // 沒接資料庫時的暫存
+let localWants = [];    // 沒接資料庫時的暫存
+let localWishes = [];
 
 const sbHeaders = {
   "apikey": SB_KEY,
@@ -1288,7 +1403,10 @@ const Wants = {
     return r.json();
   },
   async add(dish, guest) {
-    if (!useDB) { localWants.push({ dish, guest }); return; }
+    if (!useDB) {
+      if (!localWants.some(w => w.dish === dish && w.guest === guest)) localWants.push({ dish, guest });
+      return;
+    }
     const r = await fetch(SB_URL + "/rest/v1/" + SB_TABLE + "?on_conflict=dish,guest", {
       method: "POST", headers: sbHeaders, body: JSON.stringify({ dish, guest })
     });
@@ -1305,7 +1423,34 @@ const Wants = {
   }
 };
 
-/* ---- 想吃：畫面 ---- */
+const Wishes = {
+  async list() {
+    if (!useDB) return [...localWishes];
+    const r = await fetch(
+      SB_URL + "/rest/v1/" + SB_WISH_TABLE + "?select=dish,guest,created_at&order=created_at.asc",
+      { headers: { apikey: SB_KEY } }
+    );
+    if (!r.ok) throw new Error("wish read failed: " + r.status);
+    return r.json();
+  },
+  async add(dish, guest) {
+    if (!useDB) { localWishes.push({ dish, guest, created_at: new Date().toISOString() }); return; }
+    const r = await fetch(SB_URL + "/rest/v1/" + SB_WISH_TABLE, {
+      method: "POST",
+      headers: { ...sbHeaders, Prefer: "return=minimal" },
+      body: JSON.stringify({ dish, guest })
+    });
+    if (!r.ok) throw new Error("wish write failed: " + r.status);
+  },
+  async remove(dish) {
+    if (!useDB) { localWishes = localWishes.filter(w => w.dish !== dish); return; }
+    const q = "?dish=eq." + encodeURIComponent(dish);
+    const r = await fetch(SB_URL + "/rest/v1/" + SB_WISH_TABLE + q, { method: "DELETE", headers: sbHeaders });
+    if (!r.ok) throw new Error("wish delete failed: " + r.status);
+  }
+};
+
+/* ---- 推薦菜色卡片 ---- */
 $("dishes").innerHTML = CONFIG.menu.map((d, i) => `
   <article class="dish reveal" data-delay="${i * 110}">
     <div class="dish-photo"${d.img ? ` style="background-image:url('${d.img}')"` : ""}>
@@ -1319,76 +1464,203 @@ $("dishes").innerHTML = CONFIG.menu.map((d, i) => `
         <button class="want" type="button" data-dish="${d.name}">
           <span class="star">✦</span><span class="txt">想吃</span><span class="count"></span>
         </button>
-        <div class="wanters" data-for="${d.name}"></div>
+        <div class="wanters"></div>
       </div>
     </div>
   </article>
 `).join("");
 
 let wantData = [];
+let wishData = [];
 
+/* 依 DOM 上所有的想吃按鈕更新畫面（推薦菜色和大家加點的都適用） */
 function renderWants() {
-  CONFIG.menu.forEach(d => {
-    const people = wantData.filter(w => w.dish === d.name).map(w => w.guest);
-    const btn = document.querySelector('.want[data-dish="' + CSS.escape(d.name) + '"]');
-    const list = document.querySelector('.wanters[data-for="' + CSS.escape(d.name) + '"]');
-    if (!btn || !list) return;
-
+  document.querySelectorAll(".want").forEach(btn => {
+    const dish = btn.dataset.dish;
+    const row = btn.closest(".want-row");
+    const list = row ? row.querySelector(".wanters") : null;
+    const people = wantData.filter(w => w.dish === dish).map(w => w.guest);
     const mine = people.includes(me);
+
     btn.classList.toggle("on", mine);
     btn.querySelector(".txt").textContent = mine ? "想吃！" : "想吃";
     btn.querySelector(".count").textContent = people.length ? people.length : "";
 
+    if (!list) return;
+
     if (!people.length) {
       list.textContent = "";
       list.classList.remove("show");
-    } else {
-      const others = people.filter(p => p !== me);
-      let text;
-      if (mine && !others.length) text = "你說想點這道！";
-      else if (mine) text = "你和 " + others.join("、") + " 說想點這道！";
-      else text = others.join("、") + " 說想點這道！";
-      list.textContent = text;
-      list.classList.add("show");
+      return;
     }
+
+    const others = people.filter(p => p !== me);
+    let text;
+    if (mine && !others.length) text = "你說想點這道！";
+    else if (mine) text = "你和 " + others.join("、") + " 說想點這道！";
+    else text = others.join("、") + " 說想點這道！";
+    list.textContent = text;
+    list.classList.add("show");
   });
 }
 
-async function refreshWants() {
+/* ---- 大家加點的菜 ---- */
+const wishList = $("wishList");
+const wishEmpty = $("wishEmpty");
+const wishInput = $("wishInput");
+const wishAdd = $("wishAdd");
+const wishMsg = $("wishMsg");
+let msgTimer = null;
+
+function sayWish(text) {
+  wishMsg.textContent = text;
+  wishMsg.classList.add("show");
+  clearTimeout(msgTimer);
+  msgTimer = setTimeout(() => wishMsg.classList.remove("show"), 4000);
+}
+
+function renderWishes() {
+  wishList.replaceChildren();
+  wishEmpty.hidden = wishData.length > 0;
+
+  wishData.forEach(w => {
+    const li = document.createElement("li");
+    li.className = "wish-item";
+
+    const main = document.createElement("div");
+    main.className = "wish-item-main";
+
+    const name = document.createElement("span");
+    name.className = "wish-name";
+    name.textContent = w.dish;
+
+    const by = document.createElement("span");
+    by.className = "wish-by";
+    by.textContent = (w.guest === me ? "你" : w.guest) + " 加點的";
+
+    main.append(name, by);
+
+    const row = document.createElement("div");
+    row.className = "want-row";
+
+    const btn = document.createElement("button");
+    btn.className = "want";
+    btn.type = "button";
+    btn.dataset.dish = w.dish;
+    btn.innerHTML = '<span class="star">✦</span><span class="txt">想吃</span><span class="count"></span>';
+
+    row.appendChild(btn);
+
+    if (w.guest === me) {
+      const del = document.createElement("button");
+      del.className = "wish-del";
+      del.type = "button";
+      del.title = "移除這道";
+      del.setAttribute("aria-label", "移除「" + w.dish + "」");
+      del.textContent = "×";
+      del.addEventListener("click", () => removeWish(w.dish, del));
+      row.appendChild(del);
+    }
+
+    const wanters = document.createElement("div");
+    wanters.className = "wanters";
+    row.appendChild(wanters);
+
+    li.append(main, row);
+    wishList.appendChild(li);
+  });
+
+  renderWants();
+}
+
+async function addWish() {
+  const raw = wishInput.value.trim().replace(/\s+/g, " ");
+  if (!raw) { sayWish("先打點什麼吧。"); wishInput.focus(); return; }
+  if (raw.length > 30) { sayWish("太長了，30 個字以內。"); return; }
+
+  const same = s => s.toLowerCase() === raw.toLowerCase();
+  if (CONFIG.menu.some(d => same(d.name))) {
+    sayWish("這道上面已經有了，直接按那張卡的「想吃」就好。");
+    return;
+  }
+  if (wishData.some(w => same(w.dish))) {
+    sayWish("已經有人加過這道了，往下找找按個想吃。");
+    return;
+  }
+
+  wishAdd.disabled = true;
   try {
-    wantData = await Wants.list();
-    renderWants();
+    await Wishes.add(raw, me);
+    await Wants.add(raw, me);          // 加點的人預設就是想吃
+    wishData.push({ dish: raw, guest: me, created_at: new Date().toISOString() });
+    if (!wantData.some(w => w.dish === raw && w.guest === me)) wantData.push({ dish: raw, guest: me });
+    wishInput.value = "";
+    renderWishes();
+    sayWish("加好了，大家都看得到。");
   } catch (e) {
-    $("dbHint").textContent = "（想吃清單暫時讀不到，重整看看）";
+    sayWish("沒存進去，再試一次。");
+  }
+  wishAdd.disabled = false;
+}
+
+async function removeWish(dish, btn) {
+  btn.disabled = true;
+  try {
+    await Wishes.remove(dish);
+    await Wants.remove(dish, me);
+    wishData = wishData.filter(w => w.dish !== dish);
+    wantData = wantData.filter(w => w.dish !== dish);
+    renderWishes();
+  } catch (e) {
+    sayWish("刪不掉，再試一次。");
+    btn.disabled = false;
+  }
+}
+
+wishAdd.addEventListener("click", addWish);
+wishInput.addEventListener("keydown", e => {
+  if (e.key === "Enter") { e.preventDefault(); addWish(); }
+});
+
+/* ---- 想吃：點擊（用委派，動態加入的卡片也吃得到） ---- */
+document.addEventListener("click", async e => {
+  const btn = e.target.closest(".want");
+  if (!btn || btn.disabled) return;
+
+  const dish = btn.dataset.dish;
+  const mine = wantData.some(w => w.dish === dish && w.guest === me);
+  btn.disabled = true;
+  try {
+    if (mine) {
+      await Wants.remove(dish, me);
+      wantData = wantData.filter(w => !(w.dish === dish && w.guest === me));
+    } else {
+      await Wants.add(dish, me);
+      wantData.push({ dish, guest: me });
+    }
+    renderWants();
+  } catch (err) {
+    $("dbHint").textContent = "（剛剛那一下沒存進去，再按一次試試）";
+    $("dbHint").classList.add("in");
+  }
+  btn.disabled = false;
+});
+
+async function refreshAll() {
+  try {
+    const [w, s] = await Promise.all([Wants.list(), Wishes.list()]);
+    wantData = w;
+    wishData = s;
+    renderWishes();
+  } catch (e) {
+    $("dbHint").textContent = "（清單暫時讀不到，重整看看）";
     $("dbHint").classList.add("in");
   }
 }
 
-document.querySelectorAll(".want").forEach(btn => {
-  btn.addEventListener("click", async () => {
-    const dish = btn.dataset.dish;
-    const mine = wantData.some(w => w.dish === dish && w.guest === me);
-    btn.disabled = true;
-    try {
-      if (mine) {
-        await Wants.remove(dish, me);
-        wantData = wantData.filter(w => !(w.dish === dish && w.guest === me));
-      } else {
-        await Wants.add(dish, me);
-        wantData.push({ dish, guest: me });
-      }
-      renderWants();
-    } catch (e) {
-      $("dbHint").textContent = "（剛剛那一下沒存進去，再按一次試試）";
-      $("dbHint").classList.add("in");
-    }
-    btn.disabled = false;
-  });
-});
-
 $("dbHint").textContent = useDB
   ? ""
-  : "※ 目前沒接資料庫，「想吃」只會留在這次瀏覽，重整就會消失。填好 CONFIG.supabase 之後才會跨裝置同步。";
+  : "※ 目前沒接資料庫，「想吃」和「加點」只會留在這次瀏覽，重整就會消失。填好 CONFIG.supabase 之後才會跨裝置同步。";
 
 /* ---- 身分確認 ---- */
 const sel = $("who");
@@ -1434,7 +1706,7 @@ function enterSite() {
   startReveals();
   drawConstellation();
   initMap();
-  refreshWants();
+  refreshAll();
 }
 
 $("enter").addEventListener("click", enterSite);
