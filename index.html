@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Eri 的畢業典禮🎓</title>
+<title>Eri 的畢業典禮</title>
 <meta name="description" content="7/31 19:30，萬次郎居酒屋。">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -43,10 +43,13 @@ a{color:inherit}
 :focus-visible{outline:2px solid var(--aurora);outline-offset:4px;border-radius:2px}
 
 /* ---------- 星空 ---------- */
-#sky{position:fixed;inset:0;z-index:0;display:block}
+#sky{
+  position:fixed;inset:0;z-index:1;display:block;
+  width:100%;height:100%;pointer-events:none;
+}
 
 .veil{
-  position:fixed;inset:0;z-index:1;pointer-events:none;
+  position:fixed;inset:0;z-index:0;pointer-events:none;
   background:
     radial-gradient(ellipse 95% 60% at 50% -5%, rgba(95,224,206,.17), transparent 68%),
     radial-gradient(ellipse 75% 55% at 12% 92%, rgba(46,154,168,.18), transparent 70%),
@@ -348,7 +351,7 @@ body.has-cursor #halo{opacity:1}
 .menu-page.is-active{opacity:1;visibility:visible;pointer-events:auto;z-index:1}
 
 .menu-page-visual{
-  height:min(72vh,780px);min-height:430px;
+  width:100%;aspect-ratio:16/10;min-height:0;
   display:flex;align-items:center;justify-content:center;
   background:linear-gradient(145deg,rgba(12,47,59,.82),rgba(4,20,29,.92));
 }
@@ -388,21 +391,21 @@ body.has-cursor #halo{opacity:1}
 .menu-arrow[hidden]{display:none}
 
 .menu-progress{
-  display:flex;align-items:center;justify-content:center;gap:13px;
+  display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:8px 10px;
   min-height:28px;margin-top:18px;
 }
 
 .menu-progress[hidden]{display:none}
 
 .menu-progress button{
-  width:24px;height:24px;border:0;background:transparent;padding:0;
+  width:20px;height:20px;border:0;background:transparent;padding:0;
   display:flex;align-items:center;justify-content:center;
   cursor:pointer;
 }
 
 /* 四角菱形星星：進度會依 CONFIG.menuPages 頁數自動產生 */
 .menu-progress button::before{
-  content:"";display:block;width:13px;height:13px;
+  content:"";display:block;width:12px;height:12px;
   background:rgba(132,169,175,.48);
   clip-path:polygon(50% 0,59% 40%,100% 50%,59% 60%,50% 100%,41% 60%,0 50%,41% 40%);
   transform:scale(.72);
@@ -521,7 +524,7 @@ body.has-cursor #halo{opacity:1}
   .nav{gap:12px;padding:0 16px}
   .nav-mark{font-size:.82rem;letter-spacing:.1em}
   .nav-links a{padding:8px 10px;font-size:.68rem;letter-spacing:.12em}
-  .menu-page-visual{height:min(66vh,620px);min-height:360px}
+  .menu-page-visual{min-height:0}
   .menu-arrow{width:42px;height:42px}
   .menu-arrow.prev{left:10px}
   .menu-arrow.next{right:10px}
@@ -767,12 +770,12 @@ const CONFIG = {
 
   /*
     圖片建議統一放進 images 資料夾：
-    - 賓客頭像 guest-名字.webp：600 × 600 px
-    - 菜單頁面 menu-01.webp 起：1600 × 2200 px
-    - 菜色照片 dish-01.webp 起：1200 × 900 px
+    - 賓客頭像 guest-名字.png：600 × 600 px
+    - 菜單照片 menu-01.png ～ menu-19.png：1600 × 1000 px（橫式）
+    - 菜色照片 dish-01.png 起：1200 × 900 px
   */
 
-  // 賓客：avatar 放圖片路徑，例如 "images/guest-ruru.webp"；留空會顯示名字的第一個字
+  // 賓客：avatar 放圖片路徑，例如 "images/guest-ruru.png"；留空會顯示名字的第一個字
   guests: [
     { name: "Eri",      avatar: "", line: "今天你是主角。" },
     { name: "世華",     avatar: "", line: "位置幫你留好了。" },
@@ -782,16 +785,18 @@ const CONFIG = {
     { name: "Jennifer", avatar: "", line: "位置幫你留好了。" }
   ],
 
-  // 完整菜單：有幾頁就保留幾筆，進度星星會自動跟著頁數變化
-  // 建議檔名：images/menu-01.webp、menu-02.webp、menu-03.webp、menu-04.webp
-  menuPages: [
-    { img: "", caption: "菜單 01 · 點圖可放大", alt: "萬次郎居酒屋菜單第 1 頁" },
-    { img: "", caption: "菜單 02 · 點圖可放大", alt: "萬次郎居酒屋菜單第 2 頁" },
-    { img: "", caption: "菜單 03 · 點圖可放大", alt: "萬次郎居酒屋菜單第 3 頁" },
-    { img: "", caption: "菜單 04 · 點圖可放大", alt: "萬次郎居酒屋菜單第 4 頁" }
-  ],
+  // 完整菜單：預留 19 張橫式照片；圖片放進 images 資料夾後會自動讀取
+  // 檔名：images/menu-01.png ～ images/menu-19.png
+  menuPages: Array.from({ length: 19 }, (_, index) => {
+    const number = String(index + 1).padStart(2, "0");
+    return {
+      img: "images/menu-" + number + ".png",
+      caption: "菜單 " + number + " · 點圖可放大",
+      alt: "萬次郎居酒屋菜單第 " + (index + 1) + " 張"
+    };
+  }),
 
-  // 推薦菜色：每一道各自一張圖，建議依序命名 images/dish-01.webp ～ dish-06.webp
+  // 推薦菜色：每一道各自一張圖，建議依序命名 images/dish-01.png ～ dish-06.png
   menu: [
     { name: "招牌菜一", note: "一句話說明這道為什麼要點。", img: "", pick: true  },
     { name: "招牌菜二", note: "一句話說明這道為什麼要點。", img: "", pick: false },
@@ -1240,6 +1245,9 @@ function enterSite() {
   document.body.classList.remove("locked");
   $("page").classList.add("open");
   setTimeout(() => $("nav").classList.add("show"), 700);
+  shooters = [];
+  featureNextShooter = true;
+  nextShooter = performance.now() + 1100;
 
   startReveals();
   drawConstellation();
@@ -1307,7 +1315,8 @@ addEventListener("scroll", () => {
 const cv = $("sky");
 const ctx = cv.getContext("2d");
 let stars = [], shooters = [], sparks = [], W = 0, H = 0;
-let nextShooter = 900;
+let nextShooter = performance.now() + 900;
+let featureNextShooter = false;
 
 function build() {
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -1334,20 +1343,25 @@ function build() {
   });
 }
 
-/* 流星：方向統一，一律左上往右下 */
+/* 流星：獨立於「減少動態效果」，避免桌機設定誤將流星整段關閉 */
 const SHOOT_ANGLE = 0.42;   // 斜率，越大越陡
 
-function spawnShooter() {
-  const speed = 3.2 + Math.random() * 1.4;
-  const vx = speed;
-  const vy = speed * SHOOT_ANGLE;
-  const mag = Math.hypot(vx, vy);
+function spawnShooter(startTime = performance.now(), featured = false) {
+  const mag = Math.hypot(1, SHOOT_ANGLE);
+  const ux = 1 / mag;
+  const uy = SHOOT_ANGLE / mag;
+  const desktop = W >= 900;
   shooters.push({
-    x: -60 + Math.random() * W * .55,
-    y: -40 + Math.random() * H * .55,
-    vx, vy, ux: vx / mag, uy: vy / mag,
-    tailMax: 160 + Math.random() * 120,
-    life: 0, max: 190 + Math.random() * 70
+    x: featured ? W * .07 : -40 + Math.random() * W * .42,
+    y: featured ? H * .12 : 12 + Math.random() * H * .3,
+    ux, uy,
+    speed: (featured ? (desktop ? .72 : .6) : (desktop ? .56 : .46)) + Math.random() * .1,
+    tailMax: (featured
+      ? Math.min(440, Math.max(250, W * .27))
+      : Math.min(350, Math.max(190, W * .2))) + Math.random() * 35,
+    born: startTime,
+    duration: (featured ? 1900 : 1650) + Math.random() * 500,
+    power: featured ? (desktop ? 1.55 : 1.3) : (desktop ? 1.18 : 1)
   });
 }
 
@@ -1389,63 +1403,69 @@ function draw(t) {
     }
   });
 
-  if (!reduceMotion) {
-    if (t > nextShooter && shooters.length < 3) {
-      spawnShooter();
-      nextShooter = t + 1800 + Math.random() * 2200;
+  if (t > nextShooter && shooters.length < 3) {
+    spawnShooter(t, featureNextShooter);
+    featureNextShooter = false;
+    nextShooter = t + 2100 + Math.random() * 2300;
+  }
+
+  shooters = shooters.filter(sh => {
+    const age = Math.max(0, t - sh.born);
+    const p = age / sh.duration;
+    const appear  = Math.min(1, p / .14);
+    const fadeOut = p > .68 ? Math.max(0, 1 - (p - .68) / .32) : 1;
+    const alpha   = appear * fadeOut;
+    const tail    = Math.max(0, Math.min(1, (p - .06) / .26)) * sh.tailMax * fadeOut;
+
+    const distance = sh.speed * age;
+    const x = sh.x + sh.ux * distance;
+    const y = sh.y + sh.uy * distance;
+    const tx = x - sh.ux * tail;
+    const ty = y - sh.uy * tail;
+
+    ctx.globalAlpha = 1;
+
+    if (tail > 2) {
+      const g = ctx.createLinearGradient(tx, ty, x, y);
+      g.addColorStop(0, "rgba(155,240,226,0)");
+      g.addColorStop(.42, "rgba(155,240,226," + (alpha * .7) + ")");
+      g.addColorStop(1, "rgba(255,255,255," + alpha + ")");
+      ctx.strokeStyle = g;
+      ctx.lineWidth = 3 * sh.power;
+      ctx.lineCap = "round";
+      ctx.shadowBlur = 14 * alpha;
+      ctx.shadowColor = "#9BF0E2";
+      ctx.beginPath();
+      ctx.moveTo(tx, ty); ctx.lineTo(x, y);
+      ctx.stroke();
+      ctx.shadowBlur = 0;
     }
 
-    shooters = shooters.filter(sh => {
-      sh.life++;
-      const p = sh.life / sh.max;
-      const appear  = Math.min(1, p / .18);
-      const fadeOut = p > .6 ? Math.max(0, 1 - (p - .6) / .4) : 1;
-      const alpha   = appear * fadeOut;
-      const tail    = Math.max(0, Math.min(1, (p - .1) / .32)) * sh.tailMax * fadeOut;
+    ctx.shadowBlur = 28 * alpha;
+    ctx.shadowColor = "#9BF0E2";
+    ctx.fillStyle = "rgba(255,255,255," + alpha + ")";
+    ctx.beginPath();
+    ctx.arc(x, y, (1.7 + 1.8 * appear) * sh.power, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
 
-      const x = sh.x + sh.vx * sh.life;
-      const y = sh.y + sh.vy * sh.life;
-      const tx = x - sh.ux * tail;
-      const ty = y - sh.uy * tail;
+    return age < sh.duration && x < W + 460 && y < H + 400;
+  });
 
-      ctx.globalAlpha = 1;
-
-      if (tail > 2) {
-        const g = ctx.createLinearGradient(tx, ty, x, y);
-        g.addColorStop(0, "rgba(155,240,226,0)");
-        g.addColorStop(.5, "rgba(155,240,226," + (alpha * .55) + ")");
-        g.addColorStop(1, "rgba(255,255,255," + alpha + ")");
-        ctx.strokeStyle = g;
-        ctx.lineWidth = 2.4;
-        ctx.lineCap = "round";
-        ctx.beginPath();
-        ctx.moveTo(tx, ty); ctx.lineTo(x, y);
-        ctx.stroke();
-      }
-
-      ctx.shadowBlur = 22 * alpha;
-      ctx.shadowColor = "#9BF0E2";
-      ctx.fillStyle = "rgba(255,255,255," + alpha + ")";
-      ctx.beginPath();
-      ctx.arc(x, y, 1.4 + 1.6 * appear, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.shadowBlur = 0;
-
-      return sh.life < sh.max && x < W + 300 && y < H + 300;
-    });
-
+  if (!reduceMotion) {
     sparks = sparks.filter(sp => {
       sp.life++;
+      if (sp.life >= sp.max) return false;
       sp.x += sp.vx; sp.y += sp.vy; sp.vy += .012;
-      const p = 1 - sp.life / sp.max;
+      const p = Math.max(0, 1 - sp.life / sp.max);
       ctx.globalAlpha = p * .9;
       ctx.fillStyle = sp.tint;
       ctx.shadowBlur = 8; ctx.shadowColor = sp.tint;
       ctx.beginPath();
-      ctx.arc(sp.x, sp.y, sp.r * p, 0, Math.PI * 2);
+      ctx.arc(sp.x, sp.y, Math.max(.01, sp.r * p), 0, Math.PI * 2);
       ctx.fill();
       ctx.shadowBlur = 0;
-      return sp.life < sp.max;
+      return true;
     });
   }
 
@@ -1495,6 +1515,12 @@ if (matchMedia("(hover:hover)").matches && !reduceMotion) {
 build();
 requestAnimationFrame(draw);
 addEventListener("resize", build);
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden) {
+    featureNextShooter = true;
+    nextShooter = performance.now() + 520;
+  }
+});
 </script>
 </body>
 </html>
